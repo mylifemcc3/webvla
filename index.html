@@ -1,185 +1,220 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alencar e Matos Advogados Associados</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Goulart Advocacia & Associados S/S</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- Custom CSS -->
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Arial', sans-serif;
+            color: #333;
         }
-        .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1920&q=80');
+        .header {
+            background-color: #001f3f; /* Azul escuro profissional */
+            padding: 20px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        .header .nav-link {
+            color: #fff;
+            font-weight: 500;
+            margin-left: 15px;
+        }
+        .header .nav-link:hover {
+            color: #ffd700; /* Dourado para hover */
+        }
+        .hero {
+            background-image: url('https://images.pexels.com/photos/5668473/pexels-photo-5668473.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); /* Imagem genérica de advogado */
             background-size: cover;
             background-position: center;
-            color: white;
-            padding: 100px 0;
+            color: #fff;
             text-align: center;
+            padding: 150px 0;
+            position: relative;
         }
-        .hero-section h1 {
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Overlay escuro */
+        }
+        .hero h1 {
             font-size: 3rem;
-            font-weight: 700;
-        }
-        .navbar-brand {
             font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+        .hero p {
             font-size: 1.5rem;
+            position: relative;
+            z-index: 1;
         }
-        .navbar {
-            background-color: #1a3c6d;
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            color: #001f3f;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 10px;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .navbar-nav .nav-link {
-            color: white !important;
-        }
-        .navbar-nav .nav-link:hover {
-            color: #f4d03f !important;
-        }
-        .section-padding {
-            padding: 60px 0;
-        }
-        .card {
+        .service-card {
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s;
+            margin-bottom: 30px;
         }
-        .card:hover {
+        .service-card:hover {
             transform: translateY(-10px);
         }
+        .service-card img {
+            height: 200px;
+            object-fit: cover;
+        }
+        .service-card .card-title {
+            color: #001f3f;
+            font-weight: bold;
+        }
+        .service-card .card-text {
+            color: #555;
+        }
+        .about-section {
+            background-color: #f8f9fa;
+            padding: 60px 0;
+        }
+        .contact-section {
+            padding: 60px 0;
+        }
         .footer {
-            background-color: #1a3c6d;
-            color: white;
-            padding: 40px 0;
+            background-color: #001f3f;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
         }
-        .btn-primary {
-            background-color: #1a3c6d;
-            border-color: #1a3c6d;
-        }
-        .btn-primary:hover {
-            background-color: #f4d03f;
-            border-color: #f4d03f;
-            color: #1a3c6d;
+        .footer p {
+            margin: 0;
         }
     </style>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">Alencar e Matos Advogados</a>
+
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar navbar-expand-lg container">
+            <a class="navbar-brand" href="#">Goulart Advocacia & Associados</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#sobre">Sobre</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#servicos">Serviços</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contato">Contato</a>
-                    </li>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="#inicio">Início</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#sobre">Sobre</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#servicos">Serviços</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contato">Contato</a></li>
                 </ul>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
     <!-- Hero Section -->
-    <section id="home" class="hero-section">
+    <section id="inicio" class="hero">
         <div class="container">
-            <h1>Alencar e Matos Advogados Associados</h1>
-            <p class="lead">Soluções jurídicas com excelência e confiança</p>
-            <a href="#contato" class="btn btn-primary btn-lg mt-3">Entre em Contato</a>
+            <h1>Bem-vindo à Goulart Advocacia & Associados</h1>
+            <p>Seu parceiro confiável em soluções jurídicas. Com experiência e dedicação, defendemos seus direitos com excelência.</p>
         </div>
     </section>
 
     <!-- Sobre Section -->
-    <section id="sobre" class="section-padding">
+    <section id="sobre" class="about-section">
         <div class="container">
-            <h2 class="text-center mb-5">Sobre Nós</h2>
+            <h2 class="section-title">Sobre Nós</h2>
             <div class="row">
                 <div class="col-md-6">
-                    <p>Alencar e Matos Advogados Associados é um escritório comprometido em oferecer serviços jurídicos de alta qualidade. Com uma equipe experiente, atuamos em diversas áreas do direito, sempre com foco na ética, transparência e resultados para nossos clientes.</p>
-                    <p>Nossa missão é proporcionar soluções jurídicas personalizadas, garantindo segurança e confiança em cada caso que atendemos.</p>
+                    <img src="https://images.pexels.com/photos/5669619/pexels-photo-5669619.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Equipe de advogados" class="img-fluid rounded">
                 </div>
                 <div class="col-md-6">
-                    <img src="https://images.unsplash.com/photo-1589998059171-9b2e91d8b6d9?auto=format&fit=crop&w=600&q=80" alt="Escritório" class="img-fluid rounded">
+                    <p>A Goulart Advocacia & Associados S/S é um escritório de advocacia com sede em Goiânia, GO, especializado em diversas áreas do direito. Fundado com o compromisso de oferecer serviços jurídicos de alta qualidade, nosso time de profissionais experientes está pronto para atender às necessidades de indivíduos e empresas.</p>
+                    <p>Com CNPJ 27.909.849/0001-39, atuamos com ética, transparência e eficiência, garantindo resultados positivos para nossos clientes. Nossa missão é proporcionar assessoria jurídica personalizada, baseada em anos de prática e conhecimento aprofundado das leis brasileiras.</p>
+                    <p>Valorizamos a confiança de nossos clientes e trabalhamos incansavelmente para defender seus interesses em tribunais, negociações e consultorias.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Serviços Section -->
-    <section id="servicos" class="section-padding bg-light">
+    <section id="servicos" class="py-5">
         <div class="container">
-            <h2 class="text-center mb-5">Nossos Serviços</h2>
+            <h2 class="section-title">Nossos Serviços</h2>
             <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
+                <!-- Serviço 1 -->
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="https://images.pexels.com/photos/48148/document-agreement-documents-sign-48148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" class="card-img-top" alt="Direito Civil">
                         <div class="card-body">
                             <h5 class="card-title">Direito Civil</h5>
-                            <p class="card-text">Atuação em contratos, responsabilidade civil, família, sucessões e mais.</p>
+                            <p class="card-text">Atuamos em ações relacionadas a contratos, responsabilidade civil, direitos reais e obrigações. Nossa equipe analisa minuciosamente cada caso, elaborando estratégias personalizadas para resolver disputas judiciais ou extrajudiciais. Incluímos assessoria em indenizações por danos morais e materiais, posse e propriedade de bens, e recuperação de créditos. Com foco em negociações amigáveis quando possível, evitamos litígios prolongados, priorizando soluções eficientes e econômicas para nossos clientes.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
+                <!-- Serviço 2 -->
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="https://images.pexels.com/photos/164527/pexels-photo-164527.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" class="card-img-top" alt="Direito Penal">
+                        <div class="card-body">
+                            <h5 class="card-title">Direito Penal</h5>
+                            <p class="card-text">Defesa em processos criminais, desde inquéritos policiais até recursos em instâncias superiores. Oferecemos representação em crimes contra o patrimônio, honra, vida e liberdade, com ênfase em direitos humanos e princípios constitucionais. Nossa abordagem inclui análise detalhada de provas, elaboração de defesas técnicas e acompanhamento em audiências. Também atuamos em medidas cautelares, como habeas corpus e relaxamento de prisão, garantindo o devido processo legal e a preservação da dignidade do acusado.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Serviço 3 -->
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="https://images.pexels.com/photos/5668770/pexels-photo-5668770.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" class="card-img-top" alt="Direito Trabalhista">
                         <div class="card-body">
                             <h5 class="card-title">Direito Trabalhista</h5>
-                            <p class="card-text">Defesa de empregados e empregadores em questões trabalhistas.</p>
+                            <p class="card-text">Assessoria para empregados e empregadores em questões como rescisões contratuais, horas extras, assédio moral e acidentes de trabalho. Representamos em reclamações trabalhistas, negociações coletivas e auditorias preventivas. Nossa expertise abrange reformas recentes na CLT, garantindo conformidade legal e minimizando riscos. Para empresas, oferecemos consultoria em compliance trabalhista; para trabalhadores, defesa de direitos como FGTS, seguro-desemprego e indenizações, sempre com foco em justiça e equilíbrio nas relações laborais.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
+                <!-- Serviço 4 -->
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="https://images.pexels.com/photos/3771093/pexels-photo-3771093.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" class="card-img-top" alt="Direito Familiar">
+                        <div class="card-body">
+                            <h5 class="card-title">Direito de Família e Sucessões</h5>
+                            <p class="card-text">Atuação em divórcios, guarda de filhos, pensão alimentícia, inventários e partilhas de bens. Priorizamos soluções consensuais via mediação, reduzindo impactos emocionais. Incluímos planejamento sucessório, testamentos e doações, com orientação fiscal para otimizar heranças. Nossa equipe sensível lida com casos delicados, como alienação parental e adoções, garantindo o melhor interesse da criança e a equidade entre as partes, sempre alinhado às normas do Código Civil e Estatuto da Criança e do Adolescente.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Serviço 5 -->
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="https://images.pexels.com/photos/6077329/pexels-photo-6077329.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" class="card-img-top" alt="Direito Empresarial">
                         <div class="card-body">
                             <h5 class="card-title">Direito Empresarial</h5>
-                            <p class="card-text">Assessoria jurídica para empresas, contratos comerciais e compliance.</p>
+                            <p class="card-text">Consultoria para constituição de empresas, fusões, aquisições e recuperação judicial. Assessoramos em contratos comerciais, propriedade intelectual e compliance anticorrupção. Nossa atuação inclui defesa em disputas societárias, análise de riscos e planejamento estratégico para crescimento sustentável. Para startups e PMEs, oferecemos pacotes personalizados, abrangendo tributação, licitações e relações com fornecedores, garantindo proteção legal e vantagem competitiva no mercado.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Serviço 6 -->
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="https://images.pexels.com/photos/5668481/pexels-photo-5668481.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" class="card-img-top" alt="Direito Tributário">
+                        <div class="card-body">
+                            <h5 class="card-title">Direito Tributário</h5>
+                            <p class="card-text">Planejamento fiscal, contencioso administrativo e judicial contra autuações indevidas. Analisamos incentivos fiscais, restituições de créditos e defesas em execuções fiscais. Nossa expertise abrange IR, ICMS, ISS e contribuições previdenciárias, com foco em redução legal de carga tributária. Oferecemos auditorias preventivas e representação perante Receita Federal, garantindo conformidade e economia para pessoas físicas e jurídicas em um ambiente tributário complexo.</p>
                         </div>
                     </div>
                 </div>
@@ -188,18 +223,12 @@
     </section>
 
     <!-- Contato Section -->
-    <section id="contato" class="section-padding">
+    <section id="contato" class="contact-section bg-light">
         <div class="container">
-            <h2 class="text-center mb-5">Contato</h2>
+            <h2 class="section-title">Contato</h2>
             <div class="row">
                 <div class="col-md-6">
                     <h4>Entre em Contato</h4>
-                    <p><strong>Endereço:</strong> Avenida Dom Luís, 1200, Salas 706 e 707, Pat D Luis, Aldeota, Fortaleza, CE, 60160-230</p>
-                    <p><strong>CNPJ:</strong> 08.683.205/0001-20</p>
-                    <p><strong>Telefone:</strong> (85) 1234-5678</p>
-                    <p><strong>Email:</strong> contato@alencarematos.com.br</p>
-                </div>
-                <div class="col-md-6">
                     <form>
                         <div class="mb-3">
                             <label for="nome" class="form-label">Nome</label>
@@ -207,7 +236,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" placeholder="Seu email">
+                            <input type="email" class="form-control" id="email" placeholder="seu@email.com">
                         </div>
                         <div class="mb-3">
                             <label for="mensagem" class="form-label">Mensagem</label>
@@ -216,19 +245,27 @@
                         <button type="submit" class="btn btn-primary">Enviar</button>
                     </form>
                 </div>
+                <div class="col-md-6">
+                    <h4>Nossos Dados</h4>
+                    <p><strong>Endereço:</strong> Rua 103, 144, Quadra F-24, Lote 18, Setor Sul, Goiânia - GO, 74080-200</p>
+                    <p><strong>Telefone:</strong> (62) 1234-5678 (fictício para exemplo)</p>
+                    <!-- <p><strong>Email:</strong> contato@goulartadvocacia.com.br (fictício para exemplo)</p> -->
+                    <p><strong>CNPJ:</strong> 27.909.849/0001-39</p>
+                    <img src="https://images.pexels.com/photos/6373554/pexels-photo-6373554.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Escritório" class="img-fluid rounded mt-3">
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container text-center">
-            <p>&copy; 2025 Alencar e Matos Advogados Associados. Todos os direitos reservados.</p>
-            <p>Avenida Dom Luís, 1200, Salas 706 e 707, Pat D Luis, Aldeota, Fortaleza, CE, 60160-230 | CNPJ: 08.683.205/0001-20</p>
+        <div class="container">
+            <p>&copy; 2025 Goulart Advocacia & Associados S/S. Todos os direitos reservados. CNPJ: 27.909.849/0001-39</p>
+            <p>Rua 103, 144, Quadra F-24, Lote 18, Setor Sul, Goiânia - GO, 74080-200</p>
         </div>
     </footer>
 
-    <!-- Bootstrap JS and Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
